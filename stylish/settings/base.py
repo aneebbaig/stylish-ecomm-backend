@@ -2,21 +2,16 @@
 
 import os
 from pathlib import Path
+from decouple import config,Csv
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--rxlx18zxu&kzj0dkrv0*d)0mz8_p1@eu3bb%o)(0-q)_qk&r8'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 
 # Application definition
@@ -75,14 +70,17 @@ WSGI_APPLICATION = 'stylish.wsgi.application'
 # }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'stylish_db',
-        'USER': 'postgres',
-        'PASSWORD': '@Vinncorp2024',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+  'default': {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': config('PGDATABASE'),
+    'USER': config('PGUSER'),
+    'PASSWORD': config('PGPASSWORD'),
+    'HOST': config('PGHOST'),
+    'PORT': config('PGPORT', 5432),
+    'OPTIONS': {
+      'sslmode': 'require',
+    },
+  }
 }
 
 

@@ -1,0 +1,77 @@
+pipeline {
+    agent any
+
+    environment {
+        DJANGO_SETTINGS_MODULE = ''
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://your-repo-url.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Set DJANGO_SETTINGS_MODULE for the testing environment
+                    environment.DJANGO_SETTINGS_MODULE = 'stylish.settings.development'
+                    sh 'python manage.py test'
+                }
+            }
+        }
+
+        stage('Build and Deploy to Development') {
+            when {
+                branch 'dev'
+            }
+            steps {
+                script {
+                    environment.DJANGO_SETTINGS_MODULE = 'stylish.settings.development'
+                    sh '''
+                    export $(grep -v '^#' .env.dev | xargs)
+                    python manage.py migrate
+                    python manage.py collectstatic --noinput
+                    '''
+                    // Add commands to deploy to the development server
+                }
+            }
+        }
+
+        stage('Build and Deploy to Production') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    environment.DJANGO_SETTINGS_MODULE = 'your_project_name.settings.production'
+                    sh '''
+                    export $(grep -v '^#' .env.prod | xargs)
+                    python manage.py migrate
+                    python manage.py collectstatic --noinput
+                    '''
+                    // Add commands to deploy to the production server
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished'
+        }
+        success {
+            echo 'Pipeline succeeded'
+        }
+        failure {
+            echo 'Pipeline failed'
+        }
+    }
+}

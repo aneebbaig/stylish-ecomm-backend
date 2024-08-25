@@ -25,7 +25,7 @@ class RegisterAPIView(APIView):
 # API View for User Login
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
+        username = request.data.get('email')
         password = request.data.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
